@@ -19,45 +19,35 @@
   left: 0;
   width: 100%;
   height: 100%;
-    background: rgba(0,0,0,0.6);
-
+  background: rgba(0,0,0,0.6);
   display: flex;
   justify-content: center;
-  align-items: center;
-
+  align-items: flex-start;
   overflow-y: auto; 
   transition: 0.5s;
   z-index: 9999;
 }
-.loginFr{
+.loginFr {
   position: relative;
   background: white;
   padding: 2em;
   border-radius: 1em;
-  scrollbar-width: none;  
-  width: 90%;
-  max-width: 40em;
-  transition: 0.5s;
-  margin: 2em 0; 
+  width: 50%;
+  max-width: 500px;
+  margin: 2em 0;
   text-align: center;
-  max-height: 90vh; 
-  overflow-y: auto; 
-
+  
+  box-sizing: border-box;
 }
 .loginF {
   position: relative;
   background: var(--green);
-  padding: 2em;
+  padding: 1em;
   border-radius: 1em;
-  scrollbar-width: none;  
-  width: 90%;
-  max-width: 420px;
-  transition: 0.5s;
-  margin: 2em 0; 
+  width: 50%;
+  margin: 0;
   text-align: center;
-  max-height: 90vh; 
-  overflow-y: auto; 
-
+  box-sizing: border-box;
 }
 .loginF::-webkit-scrollbar {
   display: none; 

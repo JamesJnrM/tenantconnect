@@ -6,8 +6,9 @@ import { auth, db } from "./firebase/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import close from './assets/close.png';
-
-export default function Signup({ toggleSignup, toggleLogin }) {
+import Error from './Error';
+export default function Signup({ toggleSignup, toggleLogin, message, setMessage }) {
+    const [uploading, setUploading] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [cpassword, setCpassword] = useState("");
@@ -18,14 +19,16 @@ export default function Signup({ toggleSignup, toggleLogin }) {
 
     const handleSignup = async (e) => {
         e.preventDefault();
-
+        setUploading(true);
         if (password !== cpassword) {
-            alert("Passwords do not match");
+            setMessage?.("Passwords do not match");
+            setUploading(false);
             return;
         }
 
         if (!role) {
-            alert("Please select a role");
+            setUploading(false);
+            setMessage?.("Please select a role");
             return;
         }
 
@@ -53,21 +56,36 @@ export default function Signup({ toggleSignup, toggleLogin }) {
 
             toggleSignup(false);
         } catch (error) {
-            alert(error.message);
+            setMessage?.(error.message)
         }
+        setMessage?.("Account created{\n}You can now login.")
+        setUploading(false);
+        toggleSignup(false)
     };
+    
 
     return (
         <div className='login'>
             <div className='loginF'>
                 <h1>Welcome to Tenant Connect</h1>
-
+                {message && (
+                            <div style={{ display: 'flex',position: 'fixed', justifyContent: 'center', alignItems: 'center', zIndex: '9999' }}>
+                              <Error message={message} setMessage={setMessage} />
+                              
+                            </div>
+                )}
                 <div onClick={toggleLogin}>
                     <img
-                        src={close}
-                        alt="close"
-                        style={{ height: '1em', top: -85, position: 'relative', right: -190, cursor: 'pointer' }}
-                    />
+                            src={close}
+                            alt="close"
+                            style={{
+                                position: 'absolute',
+                                top: '1em',
+                                right: '1em',
+                                height: '1em',
+                                cursor: 'pointer'
+                            }}
+                        />
                 </div>
 
                 <h3 style={{ color: 'white' }}>Create your account</h3>
@@ -101,7 +119,7 @@ export default function Signup({ toggleSignup, toggleLogin }) {
                     </div>
 
                     <br />
-                    <button type="submit" className='btn-ghost'>Sign Up</button>
+                    <button type="submit" className='btn-ghost' disabled={uploading}>{uploading ? "Signing up..." : "Sign Up"}</button>
                 </form>
 
                 <div style={{ margin: '1.5em' }}>
@@ -109,15 +127,11 @@ export default function Signup({ toggleSignup, toggleLogin }) {
                         style={{ fontSize: '12px', color: 'white', cursor: 'pointer' }}
                         onClick={() => toggleSignup(false)}
                     >
-                        Already have an account? <em>Sign in</em>
+                        Already have an account? <span style={{fontFamily: 'courier New', fontWeight: 'bolder'}}>Sign in</span>
                     </p>
                 </div>
 
-                <h3>Continue with</h3>
-                <div className='loginIcons'>
-                    <div className='btn-ghostt'><img src={google} alt="google" /></div>
-                    <div className='btn-ghostt'><img src={apple} alt="apple" /></div>
-                </div>
+                
             </div>
         </div>
     );

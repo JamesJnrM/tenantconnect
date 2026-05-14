@@ -1,12 +1,19 @@
 .about-page {
   background: var(--bg);
   width: 100%;
+  
+  box-sizing: border-box;
   overflow-x: hidden;
+}
+html, body {
+  overflow-x: hidden; 
+  width: 100%;
+  max-width: 100%;
 }
 
 .about-hero {
   width: 100%;
-  padding: 120px 20px 90px;
+  padding: 7.5em 1.25em 5.6em;
   text-align: center;
   border-bottom: 0.5px solid var(--border);
 }
@@ -21,7 +28,7 @@
   color: var(--green);
 }
 .about-hero p {
-  max-width: 700px;
+  max-width: 47em;
   margin: auto;
   font-size: 18px;
   color: var(--text-2);
@@ -30,7 +37,7 @@
 
 .about-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 75em;
   margin: auto;
   padding: 80px 20px;
 }
@@ -53,7 +60,7 @@ h2 {
   font-size: 16px;
   color: var(--text-2);
   line-height: 1.8;
-  max-width: 800px;
+  max-width: 50em;
 }
 
 .about-section ul {
@@ -106,7 +113,7 @@ h2 {
   padding: 30px;
   border-radius: var(--radius-lg);
   margin-top: 30px;
-  max-width: 900px;
+  max-width: 56em;
 }
 
 .about-highlight h3 {

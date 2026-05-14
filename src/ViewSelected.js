@@ -10,14 +10,20 @@ export default function ViewSelected({selectedListing, toggleLisst, setSelectedL
                     <>
                         <img src={logo} style={{height: '4em', width: '4em'}}/>
                         <div >
-                            <img src={close} alt="close"  onClick={()=>setSelectedListing(null)} style={{ height: '1em', top: -80, position: 'relative', right: -300 }}/>
+                            <img src={close} alt="close"  onClick={()=>setSelectedListing(null)} style={{
+                                position: 'absolute',
+                                top: '1em',
+                                right: '1em',
+                                height: '1em',
+                                cursor: 'pointer'
+                            }}/>
                         </div>
                         <h4 style={{marginBottom: '1em'}}>Property details:</h4>
                         <h5 style={{color: 'white', marginBottom: '1em'}}>{selectedListing.title}</h5>
                        
                         {selectedListing?.images?.length > 0 && (
                         <div>
-                            <img src={selectedListing.images[0]} alt="" style={{objectFit: 'cover', width: '100%'}}/>
+                            <img src={selectedListing.images[0]} alt="" style={{objectFit: 'cover', width: '100%', height: '10em'}}/>
 
                             {selectedListing?.images?.length > 1 && (
                                 <div style={{display: 'flex', flexDirection: 'row', gap:'1em', width: '100%'}}>

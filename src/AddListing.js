@@ -15,14 +15,14 @@ export default function AddListing({ user, toggleLisst }) {
     const [rooms, setRooms] = useState("");
     const [bathrooms, setBathrooms] = useState("");
     const [bathroomType, setBathroomType] = useState("Shared");
-    const [viewings, setViewings] = useState(0);
+    const [viewings, setViewings] = useState([]);
     const userName = user.name;
     const userPhone = user.phone;
     const userEmail = user.email;
     
     const handleFiles = (e) => {
         const selected = Array.from(e.target.files);
-        alert(`Selected ${selected.length} file(s)`);
+        
         setFiles(selected);
     };
     const uploadFolder = async () => {
@@ -83,7 +83,7 @@ export default function AddListing({ user, toggleLisst }) {
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, { listings: updated });
 
-        alert("Listing + images saved!");
+        
         setFiles([]); 
 
     } catch (err) {
@@ -99,11 +99,17 @@ export default function AddListing({ user, toggleLisst }) {
             <div className='loginF'>
             <img src={logo} style={{ height: '3em', width: '3em' }} />
              <div onClick={toggleLisst}>
-                <img
-                    src={close}
-                    alt="close"
-                    style={{ height: '1em', top: -70, position: 'relative', right: -190 }}
-                />
+                 <img
+                            src={close}
+                            alt="close"
+                            style={{
+                                position: 'absolute',
+                                top: '1em',
+                                right: '1em',
+                                height: '1em',
+                                cursor: 'pointer'
+                            }}
+                        />
             </div>
             <h1>Please enter property details below</h1>
 

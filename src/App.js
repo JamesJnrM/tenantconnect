@@ -247,8 +247,8 @@ function App() {
         </div>
       } />
 
-        <Route path="/Login" element={<Login />} setUser={setUser} user={user} />
-        <Route path="/Signup" element={<Signup />} />
+        <Route path="/Login" element={<Login setUser={setUser} user={user} message={message} setMessage={setMessage}/>}  />
+        <Route path="/Signup" element={<Signup message={message} setMessage={setMessage}/>} />
 
         <Route path="/listings" element={<Listing setMessage={setMessage} message={message} user={user} setUser={setUser} />} />
         <Route path="/About" element={<About setMessage={setMessage} message={message} user={user} setUser={setUser} />} />

@@ -161,7 +161,7 @@ a {
   letter-spacing: -2px;
   line-height: 1.07;
   margin-bottom: 22px;
-  max-width: 660px;
+  max-width: 38em;
   margin-left: auto;
   margin-right: auto;
 }
@@ -174,7 +174,7 @@ a {
 .hero p {
   font-size: 17px;
   color: var(--text-2);
-  max-width: 480px;
+  max-width: 30em;
   margin: 0 auto 38px;
   line-height: 1.65;
   letter-spacing: -0.2px;

@@ -9,13 +9,14 @@ import { doc, getDoc } from "firebase/firestore";
 import Signup from './Signup';
 import close from './assets/close.png';
 
-export default function Login({ toggleLogin, setUser, user }) {
+export default function Login({ toggleLogin, setUser, user, message, setMessage }) {
+    const [uploading, setUploading] = useState(false);
     const [showSignup, setShowSignup] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const handleLogin = async (e) => {
         e.preventDefault();
-
+            setUploading(true);
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -37,6 +38,7 @@ export default function Login({ toggleLogin, setUser, user }) {
             } catch (error) {
                 alert(error.message);
             }
+        setUploading(false);
     };
 
     return (
@@ -45,16 +47,24 @@ export default function Login({ toggleLogin, setUser, user }) {
                 <Signup 
                     toggleSignup={setShowSignup}
                     toggleLogin={toggleLogin}
+                    message={message}
+                    setMessage={setMessage}
                 />
             ) : (
                 <div className='loginF'>
                     <h1>Welcome Back</h1>
 
                     <div onClick={toggleLogin}>
-                        <img
+                         <img
                             src={close}
                             alt="close"
-                            style={{ height: '1em', top: -50, position: 'relative', right: -190 }}
+                            style={{
+                                position: 'absolute',
+                                top: '1em',
+                                right: '1em',
+                                height: '1em',
+                                cursor: 'pointer'
+                            }}
                         />
                     </div>
 
@@ -75,24 +85,24 @@ export default function Login({ toggleLogin, setUser, user }) {
 
                         <br />
 
-                        <button type="submit" className='btn-ghost'>Login</button>
+                        <button type="submit" className='btn-ghost' disabled={uploading}>{uploading ? "Logging in..." : "Log in"}</button>
                     </form>
 
                     <div style={{ margin: '1.5em' }}>
                         <p
                             style={{ fontSize: '12px', color: 'white', cursor: 'pointer' }}
-                            onClick={() => setShowSignup(true)}
+                            onClick={() => setShowSignup(true) }
                         >
-                            Don't have an account? <em>Sign up</em>
+                            Don't have an account? <span style={{fontFamily: 'courier New', fontWeight: 'bolder'}}>Sign up</span>
                         </p>
                     </div>
 
                     <h3>Continue with</h3>
                     <div className='loginIcons'>
-                        <div className='btn-ghostt'>
+                        <div style={{borderRadius: '50%', height: '3em', width: '3em', alignItems: 'center', justifyContent: 'center'}}>
                             <img src={google} alt="google" />
                         </div>
-                        <div className='btn-ghostt'>
+                        <div style={{borderRadius: '50%', height: '3em', width: '3em', alignItems: 'center', justifyContent: 'center'}}>
                             <img src={apple} alt="apple" />
                         </div>
                     </div>

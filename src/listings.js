@@ -6,7 +6,7 @@ import bathIcon from './assets/bath.png';
 import room from './assets/rooms.png';
 import size from './assets/size.png';
 import Error from './Error';
-import { doc, updateDoc, getDoc,getDocs, collection } from "firebase/firestore";
+import { doc, updateDoc, getDoc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import Login from './Login';
 import Signup from './Signup';
@@ -31,7 +31,6 @@ function Listing({ user, setMessage, setUser, message }) {
   const toggleLisst = () => setLisst(prev => !prev);
   const toggleLogin = () => setLog(prev => !prev);
 
-
   const handleBooking = async (listing) => {
   if (!user) {
     setMessage('Please login to book a viewing.');
@@ -39,57 +38,64 @@ function Listing({ user, setMessage, setUser, message }) {
   }
 
   try {
-    const userRef = doc(db, "users", listing.userId); // listing owner
+    const userRef = doc(db, "users", listing.userId);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
-    
-    const updatedListings = userData.listings.map(item => {
-      if (item.id === listing.id) { // use id, not createdAt
-        const currentBookings = item.bookings || [];
-        
-        // prevent double booking
-        const alreadyBooked = currentBookings.some(b => b.userId === user.uid);
+
+    const updatedListings = (userData.listings || []).map(item => {
+      if (item.createdAt === listing.createdAt) {
+        const currentViewings = item.viewings || [];
+
+        const alreadyBooked = currentViewings.some(
+          v => v.userId === user.uid
+        );
+
         if (alreadyBooked) {
           throw new Error('You already booked this listing');
         }
 
-        const newBooking = {
+        const newViewing = {
           userId: user.uid,
           name: user.displayName || user.email,
           phone: user.phoneNumber || 'No phone',
           bookedAt: new Date().toISOString()
         };
 
-        return { 
-          ...item, 
-          bookings: [...currentBookings, newBooking] 
+        return {
+          ...item,
+          viewings: [...currentViewings, newViewing]
         };
       }
       return item;
     });
 
     await updateDoc(userRef, { listings: updatedListings });
+
     setMessage('Viewing booked!');
-    fetchUsers(); // refresh
-    } 
-    catch (err) {
-      setMessage(err.message || 'Failed to book viewing');
-    }
+  } 
+  catch(err){
+    setMessage(err.message || 'Failed to book viewing');
   }
-  const fetchUsers = async () => {
-    const querySnapshot = await getDocs(collection(db, "users"));
-    const users = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    const allListings = users.flatMap(u =>
-      (u.listings || []).map(l => ({ ...l, userId: u.id }))
-    );
-    setListings(allListings);
-  };
-  console.log('here',listings[0])
+};
   useEffect(() => {
-    fetchUsers();
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const users = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      const allListings = users.flatMap(u =>
+        (u.listings || []).map((l, index) => ({
+          ...l,
+          userId: u.id,
+          id: l.id || `${u.id}-${index}`
+        }))
+      );
+
+      setListings(allListings);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const filteredListings = listings
@@ -180,12 +186,18 @@ function Listing({ user, setMessage, setUser, message }) {
                 <div className="results-title">We found {filteredListings.length} properties</div>
 
                 <div className="listings-grid">
-                  {filteredListings.map((l, i) => (
-                    <div key={i} className="listing-card" style={{ opacity: op }}>
+                  {filteredListings.map((l) => (
+                    <div key={l.id} className="listing-card" style={{ opacity: op }}>
                       <div className="card-img-wrap">
-                        
-                        <img src={ l.images?.[0] ? `https://drive.google.com/thumbnail?id=${l.images[0].match(/id=([^&]+)/)?.[1]}&sz=w1000` : {room}} onClick={() => setSelectedListing(l)} style={{width: '100%', height: '15em'}} />
-                      <button
+                        <img
+                          src={l.images?.[0]
+                            ? `https://drive.google.com/thumbnail?id=${l.images[0].match(/id=([^&]+)/)?.[1]}&sz=w1000`
+                            : room}
+                          onClick={() => setSelectedListing(l)}
+                          style={{ width: '100%', height: '15em' }}
+                        />
+
+                        <button
                           className="wishlist-btn"
                           onClick={async () => {
                             if (!user) {
@@ -196,7 +208,7 @@ function Listing({ user, setMessage, setUser, message }) {
                             const exists = liked.find(item => item.id === l.id);
                             const updated = exists
                               ? liked.filter(item => item.id !== l.id)
-                              : [...liked, l];
+                              : [...liked, { id: l.id }];
 
                             setLiked(updated);
 
@@ -206,12 +218,15 @@ function Listing({ user, setMessage, setUser, message }) {
                         >
                           {liked.find(item => item.id === l.id) ? '❤️' : '♡'}
                         </button>
-                        {user && user.subscription === '1 week' && (
-                          
-                          <div >
 
-                            <button className="btn-ghost" onClick={() => handleBooking(l)}>Book for viewing</button>
-                            <p style={{fontSize: '11px', fontStyle: 'italic', marginTop: '1em', marginLeft: '1.5em'}}>Already booked for viewing by: {l.viewings.length} users</p>
+                        {user && user.subscription === '1 week' && (
+                          <div>
+                            <button className="btn-ghost" onClick={() => handleBooking(l)}>
+                              Book for viewing
+                            </button>
+                            <p style={{ fontSize: '11px', fontStyle: 'italic', marginTop: '1em', marginLeft: '1.5em' }}>
+                              Already booked for viewing by: {l.viewings?.length || 0} users
+                            </p>
                           </div>
                         )}
                       </div>
@@ -220,9 +235,7 @@ function Listing({ user, setMessage, setUser, message }) {
                         <div className="card-price">${l.price}/mo</div>
                         <div className="card-title">{l.title}</div>
                         <div className="card-address">
-                          {user?.subscription === '1 week'
-                            ? l.address
-                            : 'Subscribe to see address'}
+                          {user?.subscription === '1 week' ? l.address : 'Subscribe to see address'}
                         </div>
 
                         <div className="card-meta">
@@ -256,10 +269,10 @@ function Listing({ user, setMessage, setUser, message }) {
 
                 <div className="listings-grid">
                   {(showOthers ? otherListings : user?.listings || []).map((l, i) => (
-                    <div key={i} className="listing-card" onClick={() => setSelectedListing(l)}>
+                    <div key={l.id || i} className="listing-card" onClick={() => setSelectedListing(l)}>
                       <div className="card-img-wrap">
                         <img
-                         src={`https://drive.google.com/thumbnail?id=${l.images?.[0]?.split("id=")[1]}&sz=w1000`}
+                          src={`https://drive.google.com/thumbnail?id=${l.images?.[0]?.split("id=")[1]}&sz=w1000`}
                           alt={l.title}
                           className="card-img"
                         />
